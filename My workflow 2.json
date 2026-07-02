@@ -1,0 +1,141 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b26f2159-4a48-4551-95e7-7e27bfb8876b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4a93af15-2e31-4782-96f0-010b44b654b3",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nmjQB-5o6xBVrXX_PlQJQPOq5NzvhB0ucD5Vd4ixiIQ",
+          "mode": "list",
+          "cachedResultName": "Crypto Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nmjQB-5o6xBVrXX_PlQJQPOq5NzvhB0ucD5Vd4ixiIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 744959525,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nmjQB-5o6xBVrXX_PlQJQPOq5NzvhB0ucD5Vd4ixiIQ/edit#gid=744959525"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Coin": "bitcoin, ethereum",
+            "Price (USD)": "={{ $json.bitcoin.usd }} / {{ $json.ethereum.usd }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Coin",
+              "displayName": "Coin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price (USD)",
+              "displayName": "Price (USD)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "08bddb4c-d17e-4aac-85d9-b1a00b197f07",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pMYSB62v0y7m0vPV",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c95421a6-4aa4-4b87-a10e-46c721eaa2cf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca4067dbcfc183bd4fff6d0fed44a5868b2451cec9bf87f6697e18a05b5b89c5"
+  },
+  "nodeGroups": [],
+  "id": "RFBhRV99UYj2M2yV",
+  "tags": []
+}
