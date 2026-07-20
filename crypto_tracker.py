@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timezone
 
 # ---- CONFIG ----
-SHEETDB_URL = "https://sheetdb.io/api/v1/x01x3eh5igbxi?sheet=Sheet2"
+SHEETDB_URL = "https://sheetdb.io/api/v1/x01x3eh5igbxi"
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
