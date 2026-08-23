@@ -1,25 +1,20 @@
 name: Crypto Price Tracker
-
 on:
   schedule:
     - cron: '0 * * * *'  # runs every hour, on the hour
   workflow_dispatch:  # allows manual runs from GitHub UI too
-
 jobs:
   track-prices:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies
         run: pip install requests
-
       - name: Run crypto tracker script
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
