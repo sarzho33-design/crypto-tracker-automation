@@ -27,25 +27,32 @@ def fetch_prices():
 def get_previous_prices():
     """
     Reads the last logged row from the sheet and parses the previous
-    BTC/ETH prices out of the "Price (USD)" column (format: "65339 / 1895.3").
-    Returns (None, None) if the sheet is empty or the row can't be parsed
-    (e.g. this is the very first run).
+    BTC/ETH prices out of the "Price (USD)" column (format: "65339 / 1895.3"),
+    plus the timestamp of that observation.
+    Returns (None, None, None) if the sheet is empty or the row can't be
+    parsed (e.g. this is the very first run).
+
+    Note: this is the last SUCCESSFUL observation, not necessarily one hour
+    ago — if a scheduled run fails (e.g. GitHub Actions runner issue), the
+    gap could be 2+ hours. That's why we report "since last check" with the
+    actual previous timestamp, rather than claiming a fixed "~1h".
     """
     response = requests.get(SHEETDB_URL, timeout=15)
     response.raise_for_status()
     rows = response.json()
 
     if not rows:
-        return None, None
+        return None, None, None
 
     last_row = rows[-1]
     price_str = last_row.get("Price (USD)", "")
+    prev_timestamp = last_row.get("Date")
 
     try:
         btc_str, eth_str = price_str.split("/")
-        return float(btc_str.strip()), float(eth_str.strip())
+        return float(btc_str.strip()), float(eth_str.strip()), prev_timestamp
     except (ValueError, AttributeError):
-        return None, None
+        return None, None, None
 
 
 # ---- CALCULATE % CHANGE ----
@@ -71,13 +78,14 @@ def write_to_sheet(btc_price, eth_price, timestamp):
 
 
 # ---- SEND TELEGRAM MOVEMENT ALERT ----
-def send_movement_alert(symbol, current_price, previous_price, change_pct):
+def send_movement_alert(symbol, current_price, previous_price, change_pct, prev_timestamp):
     sign = "+" if change_pct >= 0 else ""
     message = (
         f"🚨 {symbol} MOVE\n"
         f"{symbol}: ${current_price:,.2f}\n"
-        f"{sign}{change_pct:.2f}% in ~1h\n"
-        f"Previous: ${previous_price:,.2f}"
+        f"{sign}{change_pct:.2f}% since last check\n"
+        f"Previous: ${previous_price:,.2f}\n"
+        f"Last check: {prev_timestamp}"
     )
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
@@ -91,7 +99,7 @@ def main():
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     # Read the previous observation BEFORE writing the new one.
-    prev_btc, prev_eth = get_previous_prices()
+    prev_btc, prev_eth, prev_timestamp = get_previous_prices()
 
     write_to_sheet(btc_price, eth_price, timestamp)
 
@@ -101,11 +109,11 @@ def main():
     alerts_sent = []
 
     if btc_change is not None and abs(btc_change) >= THRESHOLD_PERCENT:
-        send_movement_alert("BTC", btc_price, prev_btc, btc_change)
+        send_movement_alert("BTC", btc_price, prev_btc, btc_change, prev_timestamp)
         alerts_sent.append(f"BTC ({btc_change:+.2f}%)")
 
     if eth_change is not None and abs(eth_change) >= THRESHOLD_PERCENT:
-        send_movement_alert("ETH", eth_price, prev_eth, eth_change)
+        send_movement_alert("ETH", eth_price, prev_eth, eth_change, prev_timestamp)
         alerts_sent.append(f"ETH ({eth_change:+.2f}%)")
 
     print(
