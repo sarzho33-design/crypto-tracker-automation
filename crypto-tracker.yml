@@ -31,3 +31,4 @@ jobs:
             -d text="⚠️ Crypto Bot Failure
 Hourly job failed at $(date -u +'%Y-%m-%d %H:%M:%S UTC').
 Check GitHub Actions: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+# test comment for AI Code Guard dogfood test
