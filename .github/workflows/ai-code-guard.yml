@@ -13,3 +13,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on: critical
+pro-license-key: cae2e131-7859-4184-a1d7-eadf69cbee9e
